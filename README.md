@@ -1,4 +1,4 @@
-# FedEx Problem Statement
+# DeFex PS
 
 To generate test cases: `./generate.py --config config.json --output input.txt`
 
