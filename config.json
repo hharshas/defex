@@ -1,0 +1,30 @@
+{
+  "n" : 5,
+  "m" : 10,
+  "k" : 25,
+
+  "ULD" : {
+    "length_min" : 5,
+    "length_max" : 15,
+    "width_min" : 5,
+    "width_max" : 15,
+    "height_min" : 5,
+    "height_max" : 15,
+    "weight_limit_min" : 10,
+    "weight_limit_max" : 15
+  },
+
+  "Package" : {
+    "length_min" : 1,
+    "length_max" : 10,
+    "width_min" : 1,
+    "width_max" : 10,
+    "height_min" : 1,
+    "height_max" : 10,
+    "weight_min" : 1,
+    "weight_max" : 5,
+    "priority_probability" : 50,
+    "cost_min" : 5,
+    "cost_max" : 40
+  }
+} 
