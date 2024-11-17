@@ -1,0 +1,98 @@
+{
+    "uld_count": 2,
+    "package_count": 4,
+    "k": 40,
+    "ulds": [
+        {
+            "length": 100,
+            "width": 80,
+            "height": 80,
+            "weight_limit": 250
+        },
+        {
+            "length": 100,
+            "width": 80,
+            "height": 80,
+            "weight_limit": 250
+        }
+    ],
+    "packages": [
+        {
+            "length": 70,
+            "width": 40,
+            "height": 50,
+            "weight": 100,
+            "priority": "P",
+            "cost": 0
+        },
+        {
+            "length": 70,
+            "width": 40,
+            "height": 50,
+            "weight": 100,
+            "priority": "P",
+            "cost": 0
+        },
+        {
+            "length": 70,
+            "width": 40,
+            "height": 50,
+            "weight": 150,
+            "priority": "E",
+            "cost": 20
+        },
+        {
+            "length": 70,
+            "width": 40,
+            "height": 50,
+            "weight": 150,
+            "priority": "E",
+            "cost": 30
+        }
+    ],
+    "pkg_positions": [
+        {
+            "pkg_id": 1,
+            "uld_id": 1,
+            "x_min": 10,
+            "y_min": 0,
+            "z_min": 0,
+            "x_max": 55,
+            "y_max": 70,
+            "z_max": 50
+        },
+        {
+            "pkg_id": 2,
+            "uld_id": 2,
+            "x_min": 5,
+            "y_min": 0,
+            "z_min": 0,
+            "x_max": 45,
+            "y_max": 70,
+            "z_max": 50
+        },
+        {
+            "pkg_id": 3,
+            "uld_id": 1,
+            "x_min": 45,
+            "y_min": 0,
+            "z_min": 0,
+            "x_max": 85,
+            "y_max": 70,
+            "z_max": 50
+        },
+        {
+            "pkg_id": 4,
+            "uld_id": 2,
+            "x_min": 45,
+            "y_min": 0,
+            "z_min": 0,
+            "x_max": 85,
+            "y_max": 70,
+            "z_max": 50
+        }
+    ],
+    "cost": 80,
+    "used_pkg": 4,
+    "priority_uld_count": 2
+}
