@@ -54,12 +54,13 @@
         {
             "pkg_id": 1,
             "uld_id": 1,
-            "x_min": 10,
+            "x_min": 5,
             "y_min": 0,
             "z_min": 0,
-            "x_max": 55,
+            "x_max": 45,
             "y_max": 70,
-            "z_max": 50
+            "z_max": 50,
+            "ispriority": true
         },
         {
             "pkg_id": 2,
@@ -69,7 +70,8 @@
             "z_min": 0,
             "x_max": 45,
             "y_max": 70,
-            "z_max": 50
+            "z_max": 50,
+            "ispriority": true
         },
         {
             "pkg_id": 3,
@@ -79,7 +81,8 @@
             "z_min": 0,
             "x_max": 85,
             "y_max": 70,
-            "z_max": 50
+            "z_max": 50,
+            "ispriority": false
         },
         {
             "pkg_id": 4,
@@ -89,7 +92,8 @@
             "z_min": 0,
             "x_max": 85,
             "y_max": 70,
-            "z_max": 50
+            "z_max": 50,
+            "ispriority": false
         }
     ],
     "cost": 80,

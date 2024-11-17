@@ -57,6 +57,7 @@
                     return {
                         packageID: `P-${pkgPos.pkg_id}`,
                         uldID: `ULD-${pkgPos.uld_id}`,
+                        isPriority: pkgPos.ispriority,
                         x: pkgPos.x_min,
                         y: pkgPos.y_min,
                         z: pkgPos.z_min,
@@ -119,12 +120,15 @@
                 document.body.appendChild(renderer.domElement);
                 const controls = new OrbitControls(camera, renderer.domElement);
     
+                camera.position.set(0, 100, 300); 
+
                 const light = new THREE.PointLight(0xffffff, 1, 1000);
-                light.position.set(100, 200, 300);
-                scene.add(light);
-    
+                light.position.set(0, 50, 100); 
+                camera.add(light); 
                 const ambientLight = new THREE.AmbientLight(0x404040);
                 scene.add(ambientLight);
+
+                scene.add(camera);
     
                 const gridHelper = new THREE.GridHelper(500, 10);
                 scene.add(gridHelper);
@@ -148,26 +152,31 @@
                     scene.add(light);
                     scene.add(ambientLight);
                     scene.add(gridHelper);
-    
+                
                     const { length, width, height } = ulds[uldID];
                     const binColor = new THREE.Color(0xffffff);
                     const bin = createBox(0, 0, 0, length, width, height, binColor, true);
                     scene.add(bin);
-    
+                
                     packageList.forEach(pkg => {
-                        const { x, y, z, length, width, height, packageID } = pkg;
-                        const packageColor = new THREE.Color(0xffff00);
-                        const borderColor = new THREE.Color(0xff0000);
+                        const { x, y, z, length, width, height, packageID, isPriority } = pkg;
+
+
+                        const packageColor = isPriority ? new THREE.Color(0xff0000) : new THREE.Color(0x3399ff);  // Blue for Economic
+ 
+                        const borderColor = new THREE.Color(0xff0000);  
+
                         const flippedPackageBox = createBoxWithBorder(x, y, z, length, width, height, packageColor, borderColor);
                         scene.add(flippedPackageBox);
                         createTextLabel(packageID, x + length / 2, y + height / 2, z);
                     });
-    
+                
                     createTextLabel(`Bin: ${uldID}`, length, width + 10, 0);
                     document.getElementById("binLabel").innerText = `Bin: ${uldID}`;
                     camera.position.set(0, 200, 500);
                     controls.update();
                 }
+
     
                 document.getElementById("nextBinButton").addEventListener("click", function () {
                     currentBinIndex = (currentBinIndex + 1) % Object.keys(ulds).length;
