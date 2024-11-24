@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js ULD and Package Visualization</title>
+    <script type="importmap">
+        { "imports": { "three": "https://cdn.skypack.dev/three@0.90.0/build/three.module" } }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #button-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #binLabel {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            z-index: 10;
+            color: white;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="button-container">
+        <button id="nextBinButton">Next Bin</button>
+        <button id="zoomInButton">Zoom Out</button>
+        <button id="zoomOutButton">Zoom In</button>
+    </div>
+    <div id="binLabel">Bin: </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from "https://unpkg.com/three@0.112/examples/jsm/controls/OrbitControls.js";
+    
+        fetch('output_data.json')
+            .then(response => response.json())
+            .then(data => {
+                const output = data.pkg_positions.map(pkgPos => {
+                    const pkgData = data.packages[pkgPos.pkg_id - 1];
+                    return {
+                        packageID: `P-${pkgPos.pkg_id}`,
+                        uldID: `ULD-${pkgPos.uld_id}`,
+                        isPriority: pkgPos.ispriority,
+                        x: pkgPos.x_min,
+                        y: pkgPos.y_min,
+                        z: pkgPos.z_min,
+                        xfin: pkgPos.x_max, 
+                        yfin: pkgPos.y_max,
+                        zfin: pkgPos.z_max
+                    };
+                });
+                output.forEach(pkg => {
+                    pkg.length = pkg.xfin - pkg.x;
+                    pkg.width = pkg.yfin - pkg.y;
+                    pkg.height = pkg.zfin - pkg.z;
+                });
+    
+                const ulds = data.ulds.reduce((acc, uld, index) => {
+                    acc[`ULD-${index + 1}`] = {
+                        length: uld.length,
+                        width: uld.width,
+                        height: uld.height,
+                        weight_limit: uld.weight_limit
+                    };
+                    return acc;
+                }, {});
+    
+                let currentBinIndex = 0;
+                let currentBinID = '';
+    
+                function createBox(x0, y0, z0, length, width, height, color, transparent = false) {
+                    const geometry = new THREE.BoxGeometry(length, width, height);
+                    const material = new THREE.MeshStandardMaterial({ color, transparent, opacity: transparent ? 0.5 : 1, wireframe: false });
+                    const box = new THREE.Mesh(geometry, material);
+                    box.position.set(x0 + length / 2, y0 + width / 2, z0 + height / 2);
+                    return box;
+                }
+    
+                function createTextLabel(text, x, y, z) {
+                    const loader = new THREE.FontLoader();
+                    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                        const geometry = new THREE.TextGeometry(text, {
+                            font: font,
+                            size: 5,
+                            height: 1
+                        });
+    
+                        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                        const textMesh = new THREE.Mesh(geometry, material);
+                        textMesh.rotation.y = Math.PI;
+                        geometry.computeBoundingBox();
+                        const bbox = geometry.boundingBox;
+                        const centerX = (bbox.max.x - bbox.min.x) / 2;
+                        textMesh.position.set(x - centerX, y, z);
+                        scene.add(textMesh);
+                    });
+                }
+    
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+                const controls = new OrbitControls(camera, renderer.domElement);
+    
+                camera.position.set(0, 100, 300); 
+
+                const light = new THREE.PointLight(0xffffff, 1, 1000);
+                light.position.set(0, 50, 100); 
+                camera.add(light); 
+                const ambientLight = new THREE.AmbientLight(0x404040);
+                scene.add(ambientLight);
+
+                scene.add(camera);
+    
+                const gridHelper = new THREE.GridHelper(500, 10);
+                scene.add(gridHelper);
+    
+                function createBoxWithBorder(x0, y0, z0, length, width, height, color, borderColor, transparent = false) {
+                    const geometry = new THREE.BoxGeometry(length, width, height);
+                    const material = new THREE.MeshStandardMaterial({ color, transparent, opacity: transparent ? 0.5 : 1, wireframe: false });
+                    const box = new THREE.Mesh(geometry, material);
+                    box.position.set(x0 + length / 2, y0 + width / 2, z0 + height / 2);
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const edgeMaterial = new THREE.LineBasicMaterial({ color: borderColor });
+                    const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
+                    box.add(edgeLines);
+                    return box;
+                }
+    
+                function visualizeBin(uldID, packageList) {
+                    while (scene.children.length) {
+                        scene.remove(scene.children[0]);
+                    }
+                    scene.add(light);
+                    scene.add(ambientLight);
+                    scene.add(gridHelper);
+                
+                    const { length, width, height } = ulds[uldID];
+                    const binColor = new THREE.Color(0xffffff);
+                    const bin = createBox(0, 0, 0, length, width, height, binColor, true);
+                    scene.add(bin);
+                
+                    packageList.forEach(pkg => {
+                        const { x, y, z, length, width, height, packageID, isPriority } = pkg;
+
+
+                        const packageColor = isPriority ? new THREE.Color(0xff0000) : new THREE.Color(0x3399ff);  // Blue for Economic
+ 
+                        const borderColor = new THREE.Color(0xff0000);  
+
+                        const flippedPackageBox = createBoxWithBorder(x, y, z, length, width, height, packageColor, borderColor);
+                        scene.add(flippedPackageBox);
+                        createTextLabel(packageID, x + length / 2, y + height / 2, z);
+                    });
+                
+                    createTextLabel(`Bin: ${uldID}`, length, width + 10, 0);
+                    document.getElementById("binLabel").innerText = `Bin: ${uldID}`;
+                    camera.position.set(0, 200, 500);
+                    controls.update();
+                }
+
+    
+                document.getElementById("nextBinButton").addEventListener("click", function () {
+                    currentBinIndex = (currentBinIndex + 1) % Object.keys(ulds).length;
+                    currentBinID = Object.keys(ulds)[currentBinIndex];
+                    const currentPackageList = output.filter(pkg => pkg.uldID === currentBinID);
+                    visualizeBin(currentBinID, currentPackageList);
+                });
+    
+                document.getElementById("zoomInButton").addEventListener("click", function () {
+                    camera.position.z -= 50;
+                    controls.update();
+                });
+    
+                document.getElementById("zoomOutButton").addEventListener("click", function () {
+                    camera.position.z += 50;
+                    controls.update();
+                });
+    
+                currentBinID = Object.keys(ulds)[currentBinIndex];
+                const initialPackageList = output.filter(pkg => pkg.uldID === currentBinID);
+                visualizeBin(currentBinID, initialPackageList);
+    
+                function animate() {
+                    requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
+                }
+    
+                animate();
+            })
+            .catch(error => {
+                console.error("Error loading JSON data:", error);
+            });
+    </script>
+</body>
+</html>
