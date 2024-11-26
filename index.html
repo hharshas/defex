@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,8 +39,8 @@
 <body>
     <div id="button-container">
         <button id="nextBinButton">Next Bin</button>
-        <button id="zoomInButton">Zoom Out</button>
-        <button id="zoomOutButton">Zoom In</button>
+        <button id="zoomInButton">Zoom In</button>
+        <button id="zoomOutButton">Zoom Out</button>
     </div>
     <div id="binLabel">Bin: </div>
 
@@ -52,12 +51,12 @@
         fetch('output_data.json')
             .then(response => response.json())
             .then(data => {
-                const output = data.pkg_positions.map(pkgPos => {
-                    const pkgData = data.packages[pkgPos.pkg_id - 1];
+                const output = data.pkg_positions.map((pkgPos, index) => {
                     return {
-                        packageID: `P-${pkgPos.pkg_id}`,
+                        packageID: `Package-${index + 1}`,  // Generating a unique ID
                         uldID: `ULD-${pkgPos.uld_id}`,
                         isPriority: pkgPos.ispriority,
+                        weight: pkgPos.weight,
                         x: pkgPos.x_min,
                         y: pkgPos.y_min,
                         z: pkgPos.z_min,
@@ -66,25 +65,26 @@
                         zfin: pkgPos.z_max
                     };
                 });
+
+                // Calculate length, width, and height of each package
                 output.forEach(pkg => {
                     pkg.length = pkg.xfin - pkg.x;
                     pkg.width = pkg.yfin - pkg.y;
                     pkg.height = pkg.zfin - pkg.z;
                 });
-    
-                const ulds = data.ulds.reduce((acc, uld, index) => {
-                    acc[`ULD-${index + 1}`] = {
-                        length: uld.length,
-                        width: uld.width,
-                        height: uld.height,
-                        weight_limit: uld.weight_limit
-                    };
-                    return acc;
-                }, {});
-    
+
+                const ulds = {
+                    "ULD-1": { length: 224, width: 318, height: 162, weight_limit: 2500 },
+                    "ULD-2": { length: 224, width: 318, height: 162, weight_limit: 2500 },
+                    "ULD-3": { length: 244, width: 318, height: 244, weight_limit: 2800 },
+                    "ULD-4": { length: 244, width: 318, height: 244, weight_limit: 2800 },
+                    "ULD-5": { length: 244, width: 318, height: 285, weight_limit: 3500 },
+                    "ULD-6": { length: 244, width: 318, height: 285, weight_limit: 3500 }
+                };
+
                 let currentBinIndex = 0;
                 let currentBinID = '';
-    
+
                 function createBox(x0, y0, z0, length, width, height, color, transparent = false) {
                     const geometry = new THREE.BoxGeometry(length, width, height);
                     const material = new THREE.MeshStandardMaterial({ color, transparent, opacity: transparent ? 0.5 : 1, wireframe: false });
@@ -159,16 +159,17 @@
                     scene.add(bin);
                 
                     packageList.forEach(pkg => {
-                        const { x, y, z, length, width, height, packageID, isPriority } = pkg;
-
+                        const { x, y, z, length, width, height, packageID, isPriority, weight } = pkg;
 
                         const packageColor = isPriority ? new THREE.Color(0xff0000) : new THREE.Color(0x3399ff);  // Blue for Economic
- 
-                        const borderColor = new THREE.Color(0xff0000);  
+                        const borderColor = new THREE.Color(0xff0000);  // Red for border
 
+                        // Visualize the package
                         const flippedPackageBox = createBoxWithBorder(x, y, z, length, width, height, packageColor, borderColor);
                         scene.add(flippedPackageBox);
-                        createTextLabel(packageID, x + length / 2, y + height / 2, z);
+
+                        // Create text label for the package
+                        createTextLabel(`${packageID} (W: ${weight})`, x + length / 2, y + height / 2, z);
                     });
                 
                     createTextLabel(`Bin: ${uldID}`, length, width + 10, 0);
@@ -177,7 +178,6 @@
                     controls.update();
                 }
 
-    
                 document.getElementById("nextBinButton").addEventListener("click", function () {
                     currentBinIndex = (currentBinIndex + 1) % Object.keys(ulds).length;
                     currentBinID = Object.keys(ulds)[currentBinIndex];
