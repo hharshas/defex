@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,66 +16,82 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: black;
+            /* Set background to black */
         }
+
         #button-container {
             position: absolute;
             top: 10px;
             left: 10px;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.8);
-            color: black;
+            background: rgba(255, 255, 255, 0.2);
+            /* Transparent white for better contrast */
+            color: white;
+            /* Text color to white */
             padding: 10px;
             border-radius: 8px;
         }
-        button, input {
+
+        button,
+        input {
             font-size: 16px;
             padding: 8px;
             margin: 5px 0;
             cursor: pointer;
-            background-color: #888;
+            background-color: #555;
+            /* Dark gray for better contrast */
             color: white;
+            /* Text color to white */
             border: none;
             border-radius: 5px;
         }
-        button:hover, input:hover {
-            background-color: #bbb;
+
+        button:hover,
+        input:hover {
+            background-color: #777;
+            /* Lighter gray on hover */
         }
-        #binLabel {
-            position: absolute;
-            top: 120px;
-            left: 10px;
-            z-index: 10;
-            color: black;
-            font-size: 20px;
-        }
-        #efficiencyLabel {
-            position: absolute;
-            top: 160px;
-            left: 10px;
-            z-index: 10;
-            color: black;
-            font-size: 20px;
-        }
-        #centerOfMassLabel {
-            position: absolute;
-            top: 200px;
-            left: 10px;
-            z-index: 10;
-            color: black;
-            font-size: 20px;
-        }
+
+        #binLabel,
+        #efficiencyLabel,
+        #centerOfMassLabel,
         #priorityLabel {
             position: absolute;
-            top: 240px;
             left: 10px;
             z-index: 10;
-            color: black;
+            color: white;
+            /* Text color to white */
             font-size: 20px;
         }
 
+        #binLabel {
+            top: 120px;
+        }
 
+        #efficiencyLabel {
+            top: 160px;
+        }
+
+        #centerOfMassLabel {
+            top: 200px;
+        }
+
+        #priorityLabel {
+            top: 240px;
+        }
+
+        B {
+            position: absolute;
+            top: 500px;
+            padding: 10px;
+            color: white;
+            /* Text color to white */
+        }
     </style>
+
 </head>
+
 <body>
     <div id="button-container">
         <button id="nextBinButton">Next Bin</button>
@@ -86,7 +103,8 @@
     <div id="efficiencyLabel">Packing Efficiency: </div>
     <div id="centerOfMassLabel">Center of Mass: </div>
     <div id="priorityLabel">Priority Packages: </div>
-    <B style="position: absolute; top: 500px; padding: 10px;">green axis is y and blue is z axis and height is along y axis</B>
+    <B style="position: absolute; top: 500px; padding: 10px;">green axis is y and blue is z axis and height is along y
+        axis</B>
     <B style="position: absolute; top: 520px; padding: 10px;">red boxes are priority and yellow ones are economy</B>
 
     <script type="module">
@@ -98,15 +116,15 @@
             .then(response => response.json())
             .then(data => {
                 let tempoutput = data.pkg_positions.map((pkgPos, index) => {
-                return {
-                    pkgID: pkgPos.pkg_id,
-                    ispriority: pkgPos.ispriority,
-                    weight: pkgPos.weight,
-                    cost: pkgPos.cost
+                    return {
+                        pkgID: pkgPos.pkg_id,
+                        ispriority: pkgPos.ispriority,
+                        weight: pkgPos.weight,
+                        cost: pkgPos.cost
                     };
                 });
-                    
-                    
+
+
                 let scene, camera, renderer, controls, gridHelper;
                 let output = [];
                 let ulds = {
@@ -136,7 +154,7 @@
                 }
 
 
-                function calculateCenterOfMass(packageList) {
+                function calculateCenterOfMass(packageList, uldID) {
                     let totalWeight = 0;
                     let weightedX = 0, weightedY = 0, weightedZ = 0;
 
@@ -149,12 +167,12 @@
                     });
 
                     return {
-                        x: (weightedX / totalWeight).toFixed(2),
-                        y: (weightedY / totalWeight).toFixed(2),
-                        z: (weightedZ / totalWeight).toFixed(2)
+                        x: (((weightedX / totalWeight).toFixed(2)) / ulds[uldID].length).toFixed(2),
+                        y: ((weightedY / totalWeight).toFixed(2) / ulds[uldID].width).toFixed(2),
+                        z: ((weightedZ / totalWeight).toFixed(2) / ulds[uldID].height).toFixed(2)
                     };
                 }
-            
+
                 function parseTextToJson(text) {
                     const lines = text.split('\n').filter(line => line.trim() !== '');
                     const pkg_positions = lines.map((line, index) => {
@@ -174,21 +192,21 @@
                             z_max: values[1] === 'NONE' ? null : parseInt(values[7], 10),
                         };
                     }).filter(pkg => pkg !== null);
-                
+
                     return { pkg_positions };
                 }
-            
+
                 function handleFileUpload(event) {
                     const file = event.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = function(e) {
+                        reader.onload = function (e) {
                             const text = e.target.result;
                             const json = parseTextToJson(text);
-                            
+
                             // Log the parsed JSON to the console
                             console.log("Parsed JSON:", json);
-                        
+
                             output = json.pkg_positions.map((pkgPos, index) => ({
                                 pkgID: pkgPos.pkgId,
                                 uldID: `ULD-${pkgPos.uld_id}`,
@@ -202,9 +220,9 @@
                                 width: pkgPos.y_max - pkgPos.y_min,
                                 height: pkgPos.z_max - pkgPos.z_min
                             }));
-                            
-                            console.log("Formatted Output JSON:", output); 
-                        
+
+                            console.log("Formatted Output JSON:", output);
+
                             currentBinIndex = 0;
                             currentBinID = Object.keys(ulds)[currentBinIndex];
                             const initialPackageList = output.filter(pkg => pkg.uldID === currentBinID);
@@ -213,27 +231,88 @@
                         reader.readAsText(file);
                     }
                 }
-            
-                function createBox(x, z, y, length, height, width, isPriority, opacity = 1) {
-                    const color = isPriority ? 0xff0000 : 0xffff00; // Red for priority, yellow for regular
-                
+
+                function createBox(x, z, y, length, height, width, isPriority, opacity = 1, pkgID) {
+                    // Generate a random color for non-priority boxes
+
+                    let randomColor = "#D5FFFF";
+                    while (randomColor == "#D5FFFF") randomColor = Math.random() * 0xffffff;
+                    let color = 0 ? "#D5FFFF" : randomColor; // Red for priority, random color for others
+                    let textcolor = color;
+
+                    // Ensure priority boxes are fully opaque
+
+                    const finalOpacity = isPriority ? 0.5 : opacity;
                     const material = new THREE.MeshBasicMaterial({
                         color,
-                        transparent: opacity < 1,
-                        opacity: opacity < 1 ? opacity : 1,
+                        transparent: true,
+                        opacity: 0.65,
                     });
-                
+
                     const geometry = new THREE.BoxGeometry(length, width, height);
+
+                    if (opacity < 1) {
+                        const box = new THREE.Mesh(geometry, material);
+                        const edges = new THREE.EdgesGeometry(geometry);
+                        const lineMaterial = new THREE.LineBasicMaterial({ color: "#FFFEB3", linewidth: 10 }); // Thicker lines
+                        const line = new THREE.LineSegments(edges, lineMaterial);
+                        line.position.set(x + length / 2, y + width / 2, z + height / 2);
+                        scene.add(line);
+
+                        return;
+                    }
                     const box = new THREE.Mesh(geometry, material);
                     box.position.set(x + length / 2, y + width / 2, z + height / 2);
                     scene.add(box);
-                
-                    const edges = new THREE.EdgesGeometry(geometry); 
-                    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 }); // Black color for the border
-                    const line = new THREE.LineSegments(edges, lineMaterial); 
+
+                    // Add edges to the box for a border effect
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    if (isPriority) color = "#D5FFFF";
+                    const lineMaterial = new THREE.LineBasicMaterial({ color: color, linewidth: 1000 }); // Black border
+                    const line = new THREE.LineSegments(edges, lineMaterial);
                     line.position.set(x + length / 2, y + width / 2, z + height / 2);
                     scene.add(line);
+
+                    //                 if (isPriority) {
+                    // Add "P" text on each side of the priority box
+                    console.log(isPriority);
+                    const loader = new THREE.FontLoader();
+                    const defaultFontURL = 'https://threejs.org/examples/fonts/droid/droid_sans_bold.typeface.json'; // Default font URL
+                    loader.load(defaultFontURL, function (font) {
+                        const textGeometry = new THREE.TextGeometry(`${pkgID}`, {
+                            font: font,
+                            size: 5,  // Adjust size as needed
+                            height: 1,
+                            curveSegments: 12,
+                        });
+
+                        const textMaterial = new THREE.MeshBasicMaterial({ color: textcolor });
+                        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+                        // Position text on each side of the box
+                        const positions = [
+                            { x: x + length / 2, y: y + width / 2, z: z, rotation: new THREE.Vector3(0, -Math.PI, 0) }, // Front
+                            { x: x , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, -Math.PI/2, 0) }, // Back
+                            { x: x + length / 2, y: y, z: z + height / 2, rotation:new THREE.Vector3(Math.PI / 2,  0, Math.PI / 2) }, // Right
+                            { x: x + length / 2, y: y + width / 2, z: z + height, rotation: new THREE.Vector3(0, 0, 0) }, // Left
+                            { x: x + length , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, 0, 0) }, // Top
+                            { x: x + length / 2, y: y + width, z: z + height / 2, rotation: new THREE.Vector3(Math.PI / 2,  -Math.PI, Math.PI / 2) }, // Bottom
+                        ];
+
+                        positions.forEach(pos => {
+                            const textClone = textMesh.clone();
+                            textClone.position.set(pos.x, pos.y, pos.z);
+
+                            // Rotate the text to be normal to the corresponding face of the box
+                            textClone.rotation.set(pos.rotation.x, pos.rotation.y, pos.rotation.z);
+
+                            scene.add(textClone);
+                        });
+                    });
+                    // }
+
                 }
+
 
                 function addCoordinateAxes(length, width, height) {
                     const arrowLength = Math.max(length, width, height) / 2;
@@ -246,92 +325,99 @@
                     scene.add(yArrow);
                     scene.add(zArrow);
                 }
-            
+
                 function visualizeBin(uldID, packageList) {
                     while (scene.children.length > 0) {
                         scene.remove(scene.children[0]);
                     }
                     scene.add(gridHelper);
-                
+
                     const { length, width, height } = ulds[uldID];
                     createBox(0, 0, 0, length, width, height, false, 0.2);
-            
 
-                    let priorityCount = 0; 
+
+                    let priorityCount = 0;
                     packageList.forEach(pkg => {
                         let temp = tempoutput.filter(tt => tt.pkgID === pkg.pkgID);
                         if (temp[0].ispriority) priorityCount++;
-                        createBox(pkg.x, pkg.y, pkg.z, pkg.length, pkg.width, pkg.height, temp[0].ispriority);
+                        createBox(pkg.x, pkg.y, pkg.z, pkg.length, pkg.width, pkg.height, temp[0].ispriority, 1, pkg.pkgID);
                     });
-                
+
                     const packingEfficiency = calculatePackingEfficiency(packageList, uldID);
                     const weightEfficiency = calculateWeightEfficiency(packageList, uldID);
-                    const centerOfMass = calculateCenterOfMass(packageList);
+                    const centerOfMass = calculateCenterOfMass(packageList, uldID);
 
                     document.getElementById("binLabel").innerText = `Bin: ${uldID}`;
                     document.getElementById("efficiencyLabel").innerText = `Packing Efficiency: ${packingEfficiency}%, Weight Efficiency: ${weightEfficiency}%`;
                     document.getElementById("centerOfMassLabel").innerText = `Center of Mass: (${centerOfMass.x}, ${centerOfMass.y}, ${centerOfMass.z})`;
                     document.getElementById("priorityLabel").innerText = `Priority Packages: ${priorityCount}`; // Update the priority count label
 
-                    addCoordinateAxes(5*length, 5*width, 5*height);
+                    addCoordinateAxes(5 * length, 5 * width, 5 * height);
                     controls.update();
                 }
-            
+
                 function initScene() {
                     scene = new THREE.Scene();
-                    scene.background = new THREE.Color(0xffffff);
+                    scene.background = new THREE.Color(0x000000); // Set the background to black
+
                     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
                     renderer = new THREE.WebGLRenderer({ antialias: true });
                     renderer.setSize(window.innerWidth, window.innerHeight);
                     document.body.appendChild(renderer.domElement);
-                
-                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-                    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+
+                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Slightly dimmer ambient light
+                    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
                     directionalLight.position.set(200, 300, 400);
                     scene.add(ambientLight, directionalLight);
-                
+
                     camera.position.set(0, 200, 500);
                     controls = new OrbitControls(camera, renderer.domElement);
                     controls.update();
-                
-                    gridHelper = new THREE.GridHelper(1000, 20, 0x000000, 0x000000);
+
+                    // Create an infinite grid helper
+                    const gridHelperSize = 10000; // Extend size for a large grid
+                    const gridDivisions = 500; // Increase grid divisions for a dense grid
+                    gridHelper = new THREE.GridHelper(gridHelperSize, gridDivisions, "#3B567D", "#3B567D"); // Grey lines for the grid
+                    gridHelper.material.opacity = 1 // Make it slightly transparent
+                    gridHelper.material.transparent = true; // Enable transparency
                     scene.add(gridHelper);
                 }
-            
+
                 initScene();
-            
+
                 document.getElementById("nextBinButton").addEventListener("click", () => {
                     currentBinIndex = (currentBinIndex + 1) % Object.keys(ulds).length;
                     currentBinID = Object.keys(ulds)[currentBinIndex];
                     const currentPackageList = output.filter(pkg => pkg.uldID === currentBinID);
                     visualizeBin(currentBinID, currentPackageList);
                 });
-            
+
                 document.getElementById("zoomInButton").addEventListener("click", () => {
                     camera.position.z -= 50;
                     controls.update();
                 });
-            
+
                 document.getElementById("zoomOutButton").addEventListener("click", () => {
                     camera.position.z += 50;
                     controls.update();
                 });
-            
+
                 document.getElementById("fileUploader").addEventListener("change", handleFileUpload);
-            
+
                 function animate() {
                     requestAnimationFrame(animate);
                     renderer.render(scene, camera);
                 }
-            
-                animate();
-                
 
-                
+                animate();
+
+
+
             })
             .catch(error => {
                 console.error("Error loading JSON data:", error);
             });
     </script>
 </body>
+
 </html>
