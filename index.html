@@ -181,9 +181,11 @@
                             console.error(`Invalid line skipped: ${line}`);
                             return null;
                         }
+                        const pkgId = parseInt(values[0].substr(2), 10);
+                        const uldId = parseInt(values[1].substr(1), 10); //console.log(uldId);
                         return {
-                            pkgId: parseInt(values[0], 10),
-                            uld_id: values[1] === 'NONE' ? null : parseInt(values[1], 10),
+                            pkgId: pkgId,
+                            uld_id: values[1] === 'NONE' ? null : uldId,
                             x_min: values[1] === 'NONE' ? null : parseInt(values[2], 10),
                             y_min: values[1] === 'NONE' ? null : parseInt(values[3], 10),
                             z_min: values[1] === 'NONE' ? null : parseInt(values[4], 10),
@@ -275,40 +277,40 @@
 
                     //                 if (isPriority) {
                     // Add "P" text on each side of the priority box
-                    console.log(isPriority);
-                    const loader = new THREE.FontLoader();
-                    const defaultFontURL = 'https://threejs.org/examples/fonts/droid/droid_sans_bold.typeface.json'; // Default font URL
-                    loader.load(defaultFontURL, function (font) {
-                        const textGeometry = new THREE.TextGeometry(`${pkgID}`, {
-                            font: font,
-                            size: 5,  // Adjust size as needed
-                            height: 1,
-                            curveSegments: 12,
-                        });
+                    // console.log(isPriority);
+                    // const loader = new THREE.FontLoader();
+                    // const defaultFontURL = 'https://threejs.org/examples/fonts/droid/droid_sans_bold.typeface.json'; // Default font URL
+                    // loader.load(defaultFontURL, function (font) {
+                    //     const textGeometry = new THREE.TextGeometry(`${pkgID}`, {
+                    //         font: font,
+                    //         size: 5,  // Adjust size as needed
+                    //         height: 1,
+                    //         curveSegments: 12,
+                    //     });
 
-                        const textMaterial = new THREE.MeshBasicMaterial({ color: textcolor });
-                        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+                    //     const textMaterial = new THREE.MeshBasicMaterial({ color: textcolor });
+                    //     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
-                        // Position text on each side of the box
-                        const positions = [
-                            { x: x + length / 2, y: y + width / 2, z: z, rotation: new THREE.Vector3(0, -Math.PI, 0) }, // Front
-                            { x: x , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, -Math.PI/2, 0) }, // Back
-                            { x: x + length / 2, y: y, z: z + height / 2, rotation:new THREE.Vector3(Math.PI / 2,  0, Math.PI / 2) }, // Right
-                            { x: x + length / 2, y: y + width / 2, z: z + height, rotation: new THREE.Vector3(0, 0, 0) }, // Left
-                            { x: x + length , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, 0, 0) }, // Top
-                            { x: x + length / 2, y: y + width, z: z + height / 2, rotation: new THREE.Vector3(Math.PI / 2,  -Math.PI, Math.PI / 2) }, // Bottom
-                        ];
+                    //     // Position text on each side of the box
+                    //     const positions = [
+                    //         { x: x + length / 2, y: y + width / 2, z: z, rotation: new THREE.Vector3(0, -Math.PI, 0) }, // Front
+                    //         { x: x , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, -Math.PI/2, 0) }, // Back
+                    //         { x: x + length / 2, y: y, z: z + height / 2, rotation:new THREE.Vector3(Math.PI / 2,  0, Math.PI / 2) }, // Right
+                    //         { x: x + length / 2, y: y + width / 2, z: z + height, rotation: new THREE.Vector3(0, 0, 0) }, // Left
+                    //         { x: x + length , y: y + width / 2, z: z + height / 2, rotation: new THREE.Vector3(0, 0, 0) }, // Top
+                    //         { x: x + length / 2, y: y + width, z: z + height / 2, rotation: new THREE.Vector3(Math.PI / 2,  -Math.PI, Math.PI / 2) }, // Bottom
+                    //     ];
 
-                        positions.forEach(pos => {
-                            const textClone = textMesh.clone();
-                            textClone.position.set(pos.x, pos.y, pos.z);
+                    //     positions.forEach(pos => {
+                    //         const textClone = textMesh.clone();
+                    //         textClone.position.set(pos.x, pos.y, pos.z);
 
-                            // Rotate the text to be normal to the corresponding face of the box
-                            textClone.rotation.set(pos.rotation.x, pos.rotation.y, pos.rotation.z);
+                    //         // Rotate the text to be normal to the corresponding face of the box
+                    //         textClone.rotation.set(pos.rotation.x, pos.rotation.y, pos.rotation.z);
 
-                            scene.add(textClone);
-                        });
-                    });
+                    //         scene.add(textClone);
+                    //     });
+                    // });
                     // }
 
                 }
